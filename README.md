@@ -1,7 +1,22 @@
 # huggingface_workshop
-Opensource LLMs and Customization
+This repo contains the materials for a hands-on workshop on **Opensource LLMs and Customization**:
+- Slides (overview, ecosystem, datasets, models, local inference)
+- Google Colab Notebook (cell-by-cell walkthrough)
 
-## Content
+## Agenda
+1. What is Hugging Face?
+2. Working with datasets
+3. Downloading and running models
+4. Running LLMs locally (Ollama & vLLM)
 
-* [huggingface_workshop.ipynb](./huggingface_workshop.ipynb)
+## Materials
+- [📑 Slides](./huggingface_workshop_slides.pdf)
+* [📑 Notebook](./huggingface_workshop.ipynb)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/audiracmichelle/huggingface_workshop/blob/main/huggingface_workshop.ipynb)
+
+## Requirements
+If you want to run locally:
+
+```bash
+pip install -r requirements.txt
+```
