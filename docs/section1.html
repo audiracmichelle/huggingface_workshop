@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1 &mdash; Navigate the Hugging Face Ecosystem</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Hugging Face Workshop</h1>
+  <p class="subtitle">Hands-on workshop on Hugging Face datasets, models, and tools</p>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="section1.html" class="active">1 &mdash; Navigate HF</a>
+  <a href="section2.html">2 &mdash; HF MCP</a>
+  <a href="section3.html">3 &mdash; Run Models</a>
+  <a href="section4.html">4 &mdash; Training Loop</a>
+</nav>
+
+<div class="content">
+
+  <h2>Section 1 &mdash; Navigate the Hugging Face Ecosystem</h2>
+  <p>In this section we explore what Hugging Face is, how the Hub organizes AI resources around <strong>tasks</strong>, and how to work with datasets and models using the <code>datasets</code> and <code>transformers</code> libraries.</p>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>1.1 What is Hugging Face?</h2>
+
+  <p><a href="https://huggingface.co/" target="_blank">Hugging Face</a> is an open-source ML/AI ecosystem built around three pillars:</p>
+  <ul>
+    <li><strong>The Hub</strong> &mdash; open repositories of pre-trained <em>models</em>, ML-ready <em>datasets</em>, and demo <em>Spaces</em> (apps)</li>
+    <li><strong>Libraries</strong> &mdash; Python packages (<code>datasets</code>, <code>transformers</code>, <code>diffusers</code>, &hellip;) for interacting with the Hub</li>
+    <li><strong>Community</strong> &mdash; discussion forums, model cards, dataset cards, and collaborative workflows</li>
+  </ul>
+
+  <p>Everything on the Hub is organized by <strong>tasks</strong>.</p>
+
+  <h3>What are tasks?</h3>
+
+  <p><strong>Tasks</strong> describe the shape of each model's API &mdash; the expected inputs and outputs.</p>
+
+  <div class="figure">
+    <img src="../images/hf_tasks.png" alt="Hugging Face tasks overview">
+    <div class="caption">Image source: Hugging Face Docs</div>
+  </div>
+
+  <p>Two image tasks we will work with:</p>
+  <table>
+    <tr><th>Task</th><th>Input</th><th>Output</th></tr>
+    <tr>
+      <td>Image Classification</td>
+      <td>Image</td>
+      <td>Vector of one score per class &rarr; argmax = predicted class</td>
+    </tr>
+    <tr>
+      <td>Image Segmentation</td>
+      <td>Image</td>
+      <td>Per-pixel class scores &rarr; per-pixel argmax = class masks</td>
+    </tr>
+  </table>
+
+  <div class="figure">
+    <img src="../images/segmentation_diagram.png" alt="Segmentation diagram" style="max-width:400px;">
+    <div class="caption">Image source: ChatGPT generated</div>
+  </div>
+
+  <div class="callout blue">
+    <strong>Explore more tasks</strong>
+    Browse the full task catalogue at <a href="https://huggingface.co/tasks" target="_blank">huggingface.co/tasks</a>
+    and the image segmentation page at <a href="https://huggingface.co/tasks/image-segmentation" target="_blank">huggingface.co/tasks/image-segmentation</a>.
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>1.2 Working with Datasets on the Hub</h2>
+
+  <p>The workflow for using any Hugging Face dataset has three steps:</p>
+
+  <h3>1.2.1 Step 1 &mdash; Filter datasets by task</h3>
+
+  <p>Go to <a href="https://huggingface.co/datasets" target="_blank">huggingface.co/datasets</a> and filter by your task (e.g. <em>image segmentation</em>). In this workshop we use two versions of the Restor tree cover dataset:</p>
+
+  <table>
+    <tr><th>Dataset</th><th>Rows</th><th>Description</th></tr>
+    <tr>
+      <td><a href="https://huggingface.co/datasets/restor/tcd" target="_blank"><code>restor/tcd</code></a></td>
+      <td>~4,600</td>
+      <td>Full tree cover detection dataset (~4 GB)</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/datasets/restor/tcd-nc" target="_blank"><code>restor/tcd-nc</code></a></td>
+      <td>237</td>
+      <td>Small sample for quick experimentation</td>
+    </tr>
+  </table>
+
+  <h3>1.2.2 Step 2 &mdash; Explore data on the Hub</h3>
+
+  <p>Before writing any code, the Hub lets you explore datasets interactively:</p>
+  <ul>
+    <li><strong>Dataset card</strong> &mdash; documentation, licensing, and methodology</li>
+    <li><strong>Dataset viewer</strong> &mdash; preview rows, images, and annotations in the browser</li>
+    <li><strong>SQL console</strong> &mdash; run queries directly over the data splits</li>
+  </ul>
+
+  <p>Example queries you can run in the <a href="https://huggingface.co/datasets/restor/tcd-nc/sql-console/zQ4yMoB" target="_blank">SQL console</a>:</p>
+
+<pre><code>SELECT biome_name, annotation FROM test WHERE biome = 1 LIMIT 10</code></pre>
+
+<pre><code>SELECT biome_name, COUNT(*) FROM train GROUP BY biome_name</code></pre>
+
+  <h4>Understanding Parquet files</h4>
+
+  <p>If you look at the dataset files on the Hub, you'll see <code>*.parquet</code> files. Parquet is the standard storage format for Hugging Face datasets:</p>
+  <ul>
+    <li><strong>Columnar</strong> &mdash; optimized for querying and processing large datasets</li>
+    <li><strong>Fast</strong> &mdash; blazing fast read/write operations</li>
+    <li><strong>Efficient</strong> &mdash; compressed storage, split into smaller chunks for robust transfers</li>
+  </ul>
+
+  <div class="figure">
+    <img src="../images/parquet_diagram.png" alt="Parquet file diagram" style="max-width:400px;">
+    <div class="caption">Splitting parquets into smaller chunks improves robustness of data transfers.</div>
+  </div>
+
+  <h3>1.2.3 Step 3 &mdash; Use the <code>datasets</code> library</h3>
+
+  <p>The <code>datasets</code> library is the programmatic way to load, inspect, and process Hugging Face datasets in Python.</p>
+
+  <h4>Load a small dataset</h4>
+
+<pre><code>from datasets import load_dataset
+
+"""
+  Load a (small) dataset
+"""
+dataset = load_dataset("restor/tcd-nc")</code></pre>
+
+  <p>A <code>DatasetDict</code> contains one <code>Dataset</code> per split:</p>
+
+<pre><code>print(dataset)
+# DatasetDict({
+#     train: Dataset({ features: [...], num_rows: 237 })
+#     test:  Dataset({ features: [...], num_rows: 35 })
+# })</code></pre>
+
+  <h4>Inspect splits, features, and shape</h4>
+
+<pre><code>print("Splits:", list(dataset.keys()))
+# Splits: ['train', 'test']
+
+print("Features:", dataset["train"].features)
+# Features: {'image_id': Value('int64'), 'image': Image(...), 'annotation': Image(...), ...}
+
+print(dataset["train"].shape)
+# (237, 17)</code></pre>
+
+  <div class="callout green">
+    <strong>Under the hood: Apache Arrow</strong>
+    The <code>datasets</code> library is powered by <a href="https://huggingface.co/docs/datasets/main/en/about_arrow" target="_blank">Apache Arrow</a>, which enables zero-copy reads and memory-mapped access to data on disk.
+  </div>
+
+  <h4>Pull samples and view images</h4>
+
+  <p>Image columns are returned as PIL objects. Let's pull one sample from each split:</p>
+
+<pre><code>"""
+  Pull one sample from each split
+"""
+image_train = dataset["train"][0]["image"]
+image_test  = dataset["test"][15]["image"]
+
+image_train.resize((512, 512))</code></pre>
+
+<pre><code>image_test.resize((512, 512))</code></pre>
+
+  <h4>When to use <code>streaming=True</code></h4>
+
+  <p>For large datasets, use streaming to preview and sample <strong>without downloading the entire dataset</strong>:</p>
+
+<pre><code>"""
+  Stream a (big/large) dataset
+"""
+iter_dataset = load_dataset("restor/tcd", streaming=True)
+print(iter_dataset)
+# IterableDatasetDict({
+#     train: IterableDataset({ features: [...], num_shards: 7 })
+#     test:  IterableDataset({ features: [...], num_shards: 1 })
+# })</code></pre>
+
+  <p>With streaming, you iterate over samples one at a time:</p>
+
+<pre><code>it = iter(iter_dataset['train'])
+sample = next(it)
+sample["image"].resize((512, 512))</code></pre>
+
+  <p>You can also view the annotation mask:</p>
+
+<pre><code>sample["annotation"].resize((512, 512))</code></pre>
+
+  <div class="callout yellow">
+    <strong>Rule of thumb</strong>
+    Use <code>streaming=True</code> for large datasets (e.g. <code>restor/tcd</code> at ~4 GB).
+    Use <code>streaming=False</code> (the default) for small datasets (e.g. <code>restor/tcd-nc</code> at 237 rows).
+  </div>
+
+  <h3>1.2.4 Discussion</h3>
+
+  <ul>
+    <li>Find an <strong>image classification</strong> dataset on the Hub. How is it different from an image segmentation dataset?</li>
+    <li>Does the Hugging Face Datasets Hub follow the <strong>FAIR</strong> principles?
+      <ul>
+        <li><strong>F</strong>indable</li>
+        <li><strong>A</strong>ccessible</li>
+        <li><strong>I</strong>nteroperable</li>
+        <li><strong>R</strong>eusable</li>
+      </ul>
+    </li>
+  </ul>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>1.3 Working with Models on the Hub</h2>
+
+  <p>Just like datasets, the workflow for models has three steps.</p>
+
+  <h3>1.3.1 Step 1 &mdash; Filter models by task</h3>
+
+  <p>Go to <a href="https://huggingface.co/models" target="_blank">huggingface.co/models</a> and filter by task. For image segmentation, we use two models:</p>
+
+  <table>
+    <tr><th>Model</th><th>Classes</th><th>Description</th></tr>
+    <tr>
+      <td><a href="https://huggingface.co/nvidia/segformer-b0-finetuned-ade-512-512" target="_blank"><code>nvidia/segformer-b0-finetuned-ade-512-512</code></a></td>
+      <td>150</td>
+      <td>NVIDIA SegFormer fine-tuned on ADE20K (general scene segmentation)</td>
+    </tr>
+    <tr>
+      <td><a href="https://huggingface.co/restor/tcd-segformer-mit-b0" target="_blank"><code>restor/tcd-segformer-mit-b0</code></a></td>
+      <td>2</td>
+      <td>SegFormer fine-tuned on the Restor TCD dataset (tree / background)</td>
+    </tr>
+  </table>
+
+  <h3>1.3.2 Step 2 &mdash; Explore on the Hub</h3>
+
+  <p>Before writing code, explore the model card. Key excerpts from the <code>tcd-segformer-mit-b0</code> card:</p>
+
+  <div class="callout">
+    <strong>From the model card</strong>
+    "The model does not detect individual trees, but provides a per-pixel classification of tree/no-tree."
+    <br><br>
+    "Fine-tuned from model: SegFormer family"
+  </div>
+
+  <h4>Understanding Safetensors files</h4>
+
+  <p>Model weights on the Hub are stored as <code>*.safetensors</code> files. This format is preferred because it is:</p>
+  <ul>
+    <li><strong>Secure</strong> &mdash; unlike pickle-based formats (<code>.bin</code>, <code>.pt</code>), it cannot execute arbitrary code during loading</li>
+    <li><strong>Efficient</strong> &mdash; supports zero-copy memory mapping and lazy loading of individual tensors</li>
+    <li><strong>Framework-agnostic</strong> &mdash; stores raw numerical data and metadata without framework-specific code</li>
+    <li><strong>Compact</strong> &mdash; contains only weights and metadata, making it easy to transfer and deploy</li>
+  </ul>
+
+  <div class="figure">
+    <img src="../images/safetensors_viewer.png" alt="Safetensors viewer screenshot">
+    <div class="caption">Screenshot showing a model weight viewer. Inside the decode_head: batch_norm layers, linear_c projection layers, and the final classifier layer producing class logits.</div>
+  </div>
+
+  <h3>1.3.3 Step 3 &mdash; Use the <code>transformers</code> library: Manual Inference with Model + Processor</h3>
+
+  <p>The <code>transformers</code> library provides two key components: <strong>models</strong> and <strong>processors</strong>.</p>
+
+  <h4>Load model and processor</h4>
+
+<pre><code>"""
+There are two key components in the transformers library: models and processors
+"""
+from transformers import AutoModelForSemanticSegmentation, AutoImageProcessor
+
+segformer_processor = AutoImageProcessor.from_pretrained(
+    "nvidia/segformer-b0-finetuned-ade-512-512"
+)
+segformer_model = AutoModelForSemanticSegmentation.from_pretrained(
+    "nvidia/segformer-b0-finetuned-ade-512-512"
+)</code></pre>
+
+  <div class="callout blue">
+    <strong>The <code>Auto*</code> pattern</strong>
+    Classes like <code>AutoModelForSemanticSegmentation</code> and <code>AutoImageProcessor</code> automatically detect the correct model architecture and processor from the Hub repository.
+    You don't need to know whether the model is SegFormer, DeepLab, or something else &mdash; the <code>Auto*</code> classes handle it.
+    This is the recommended way to load models and processors.
+  </div>
+
+  <div class="callout green">
+    <strong>Why <code>from_pretrained()</code>?</strong>
+    The <code>from_pretrained()</code> method downloads weights and configuration from the Hub (or a local path), initializes the model architecture, and loads the pre-trained weights.
+    This is the standard pattern across all of <code>transformers</code>.
+  </div>
+
+  <h4>Process inputs, run inference, post-process</h4>
+
+<pre><code># Process inputs: converts PIL image to model-ready tensors
+inputs = segformer_processor(images=image_test, return_tensors="pt")</code></pre>
+
+<pre><code># Predict masks
+import torch
+
+with torch.no_grad():
+    outputs = segformer_model(**inputs)</code></pre>
+
+  <div class="callout yellow">
+    <strong>Why <code>torch.no_grad()</code>?</strong>
+    During inference we don't need to compute gradients (that's only for training).
+    Wrapping inference in <code>torch.no_grad()</code> saves memory and speeds up computation.
+  </div>
+
+<pre><code># Post-process: resize predictions back to original image size
+outputs = segformer_processor.post_process_semantic_segmentation(
+    outputs, target_sizes=[image_test.size[::-1]]
+)[0]
+masks = outputs.numpy()</code></pre>
+
+  <h4>Visualize the results</h4>
+
+<pre><code>import matplotlib.pyplot as plt
+
+# Plot input image and predicted segmentation side by side
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+ax[0].imshow(image_test)
+ax[0].axis("off")
+
+ax[1].imshow(masks, cmap="tab20")
+ax[1].axis("off")
+
+plt.show()</code></pre>
+
+<pre><code># Overlay the segmentation on the original image
+plt.imshow(image_test)
+plt.imshow(masks, alpha=0.5, cmap="tab20")
+plt.show()</code></pre>
+
+  <h4>Inspect predicted classes</h4>
+
+<pre><code># Get unique class IDs in the predicted mask
+unique_ids = torch.unique(outputs)
+
+# Map IDs to human-readable labels
+labels = [segformer_model.config.id2label[int(i)] for i in unique_ids]
+
+print("Number of classes:", len(labels))
+print("Classes:", labels)
+# Number of classes: 15
+# Classes: ['wall', 'building', 'floor', 'tree', 'road', 'windowpane',
+#           'grass', 'sidewalk', 'earth', 'plant', 'water', 'box',
+#           'signboard', 'path', 'bannister']</code></pre>
+
+  <p>The NVIDIA model was trained on ADE20K (150 classes of general scenes), so it recognizes many object types &mdash; but it was not specifically trained to detect tree cover.</p>
+
+  <h3>1.3.4 Discussion</h3>
+
+  <p>Explore the model card for <a href="https://huggingface.co/restor/tcd-segformer-mit-b0" target="_blank"><code>restor/tcd-segformer-mit-b0</code></a> and answer:</p>
+  <ul>
+    <li>For how long and with how many GPUs were each of the models trained?</li>
+    <li>What is the carbon footprint of the training?</li>
+  </ul>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>1.4 Additional Resources</h2>
+
+  <ul class="resources">
+    <li>
+      <a href="https://huggingface.co/docs/datasets/main/en/index" target="_blank"><strong>datasets library docs</strong></a>
+      <span class="desc">Full documentation for the datasets library</span>
+    </li>
+    <li>
+      <a href="https://huggingface.co/docs/dataset-viewer/index" target="_blank"><strong>Dataset Viewer docs</strong></a>
+      <span class="desc">How the Hub's dataset viewer works</span>
+    </li>
+    <li>
+      <a href="https://huggingface.co/docs/hub/en/datasets-overview" target="_blank"><strong>Datasets on the Hub</strong></a>
+      <span class="desc">Overview of how datasets are hosted on the Hub</span>
+    </li>
+    <li>
+      <a href="https://huggingface.co/docs/dataset-viewer/parquet" target="_blank"><strong>Parquet files</strong></a>
+      <span class="desc">How parquet storage works on the Hub</span>
+    </li>
+    <li>
+      <a href="https://huggingface.co/docs/hub/en/models-the-hub" target="_blank"><strong>Models on the Hub</strong></a>
+      <span class="desc">Overview of how models are hosted on the Hub</span>
+    </li>
+    <li>
+      <a href="https://huggingface.co/docs/transformers/v4.52.1/index" target="_blank"><strong>transformers library docs</strong></a>
+      <span class="desc">Full documentation for the transformers library</span>
+    </li>
+    <li>
+      <a href="https://huggingface.co/docs/safetensors/en/index" target="_blank"><strong>Safetensors docs</strong></a>
+      <span class="desc">Documentation for the safetensors format</span>
+    </li>
+  </ul>
+
+  <p style="text-align:center; margin-top:2rem;">
+    <a href="section2.html" class="btn">Next: Use Hugging Face MCP &rarr;</a>
+  </p>
+
+</div>
+
+<footer>
+  &copy; 2025 Hugging Face Workshop
+</footer>
+
+</body>
+</html>

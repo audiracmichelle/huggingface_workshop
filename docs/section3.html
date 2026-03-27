@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3 &mdash; Run Models in Minutes</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Hugging Face Workshop</h1>
+  <p class="subtitle">Hands-on workshop on Hugging Face datasets, models, and tools</p>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="section1.html">1 &mdash; Navigate HF</a>
+  <a href="section2.html">2 &mdash; HF MCP</a>
+  <a href="section3.html" class="active">3 &mdash; Run Models</a>
+  <a href="section4.html">4 &mdash; Training Loop</a>
+</nav>
+
+<div class="content">
+
+  <h2>Section 3 &mdash; Run Models in Minutes</h2>
+  <p>In this section we get data samples, use <code>pipeline()</code> for inference, and compare the NVIDIA SegFormer and TCD-SegFormer on a test sample.</p>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>3.1 Get Data Samples with <code>datasets</code></h2>
+
+<pre><code>from datasets import load_dataset
+
+"""
+  Load the dataset and pull one sample from each split
+"""
+dataset = load_dataset("restor/tcd-nc")
+
+image_train = dataset["train"][0]["image"]
+image_test  = dataset["test"][15]["image"]</code></pre>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>3.2 Perform Inference with <code>transformers</code></h2>
+
+  <p>Using <code>pipeline()</code>, we can go from an image to segmentation results in a single call:</p>
+
+<pre><code>from transformers import pipeline
+
+nvidia_segformer_pipeline = pipeline(
+    "image-segmentation",
+    model="nvidia/segformer-b0-finetuned-ade-512-512"
+)
+
+result = nvidia_segformer_pipeline(image_test)
+
+# Each element is a dict with 'label' and 'mask' (PIL Image)
+print("Number of classes:", len(result))
+# Number of classes: 15</code></pre>
+
+<pre><code>import matplotlib.pyplot as plt
+
+# Visualize selected class masks
+fig, ax = plt.subplots(1, 3, figsize=(12, 4))
+
+for i, idx in enumerate([3, 6, 9]):
+    ax[i].imshow(image_test)
+    ax[i].imshow(result[idx]["mask"], alpha=0.5)
+    ax[i].set_title(result[idx]["label"])
+    ax[i].axis("off")
+
+plt.tight_layout()
+plt.show()</code></pre>
+
+  <p>The NVIDIA model was trained on ADE20K (150 classes of general scenes), so it recognizes many object types &mdash; but it was not specifically trained to detect tree cover.</p>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>3.3 Compare NVIDIA SegFormer and TCD-SegFormer on <code>image_test</code></h2>
+
+  <p>Now let's run both models on the same <code>image_test</code> sample and compare. The TCD SegFormer was fine-tuned specifically for tree cover detection, so it outputs only 2 classes: <code>background</code> and <code>tree</code>.</p>
+
+<pre><code>restor_tcd_pipeline = pipeline(
+    "image-segmentation",
+    model="restor/tcd-segformer-mit-b0"
+)
+
+nvidia_result = nvidia_segformer_pipeline(image_test)
+tcd_result    = restor_tcd_pipeline(image_test)</code></pre>
+
+<pre><code># Side-by-side comparison on image_test
+fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+
+ax[0].imshow(image_test)
+ax[0].set_title("Original (image_test)")
+ax[0].axis("off")
+
+# NVIDIA SegFormer: overlay the "tree" class (index 3)
+ax[1].imshow(image_test)
+ax[1].imshow(nvidia_result[3]["mask"], alpha=0.5)
+ax[1].set_title("NVIDIA SegFormer — tree class")
+ax[1].axis("off")
+
+# TCD SegFormer: overlay the "tree" class (index 1)
+ax[2].imshow(image_test)
+ax[2].imshow(tcd_result[1]["mask"], alpha=0.5)
+ax[2].set_title("TCD SegFormer — tree class")
+ax[2].axis("off")
+
+plt.tight_layout()
+plt.show()</code></pre>
+
+  <h3>3.3.1 Key differences</h3>
+
+  <table>
+    <tr><th></th><th>NVIDIA SegFormer</th><th>TCD SegFormer</th></tr>
+    <tr>
+      <td><strong>Training data</strong></td>
+      <td>ADE20K (general scenes)</td>
+      <td>Restor TCD (aerial tree cover)</td>
+    </tr>
+    <tr>
+      <td><strong>Classes</strong></td>
+      <td>150</td>
+      <td>2 (tree / background)</td>
+    </tr>
+    <tr>
+      <td><strong>Output layer</strong></td>
+      <td>150 output channels (38,550 params)</td>
+      <td>2 output channels (514 params)</td>
+    </tr>
+    <tr>
+      <td><strong>Total params</strong></td>
+      <td>3.75M</td>
+      <td>3.71M</td>
+    </tr>
+    <tr>
+      <td><strong>Best for</strong></td>
+      <td>General scene understanding</td>
+      <td>Tree cover detection in aerial imagery</td>
+    </tr>
+  </table>
+
+  <p>Both models share the same SegFormer backbone (<code>mit-b0</code>), but differ in their <strong>decode head</strong> &mdash; specifically the final classifier layer, which was re-trained for the target task. This is the power of <strong>fine-tuning</strong>: adapting a general-purpose model to a specific domain.</p>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>3.4 Discussion</h2>
+
+  <p>Reflecting on the comparison results:</p>
+  <ul>
+    <li>What did fine-tuning buy us? How does the TCD output differ from the NVIDIA output on the same image?</li>
+    <li>Are there benefits of fine-tuning in terms of GPU time?</li>
+    <li>How is fine-tuning relevant for science?</li>
+  </ul>
+
+  <p><strong>Try it yourself</strong> &mdash; Use the ID of an image stored in your Google Drive and run the <code>SlimSAM-uniform-77</code> segmenter:</p>
+
+<pre><code>sam_pipeline = pipeline("image-segmentation", model="Zigeng/SlimSAM-uniform-77")
+sam_pipeline("https://drive.google.com/uc?export=view&id=&lt;your_image_id&gt;")</code></pre>
+
+  <ul>
+    <li>How many masks and which labels do the results have?</li>
+  </ul>
+
+  <p style="text-align:center; margin-top:2rem;">
+    <a href="section4.html" class="btn">Next: Build a Training Loop &rarr;</a>
+  </p>
+
+</div>
+
+<footer>
+  &copy; 2025 Hugging Face Workshop
+</footer>
+
+</body>
+</html>

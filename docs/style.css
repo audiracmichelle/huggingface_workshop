@@ -1,0 +1,250 @@
+/* ── Color palette ── */
+:root {
+  --crimson: #A51C30;
+  --crimson-dark: #8C1515;
+  --text: #1E1E1E;
+  --text-light: #555555;
+  --bg: #FFFFFF;
+  --bg-warm: #F7F5F2;
+  --code-bg: #F3F4F4;
+  --border: #E0DCDA;
+}
+
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+/* ── Layout ── */
+header, nav, .content, footer {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ── Header ── */
+header {
+  padding-top: 2rem;
+  padding-bottom: 0.5rem;
+  text-align: center;
+}
+header h1 {
+  font-size: 1.8rem;
+  color: var(--crimson-dark);
+  margin: 0.5rem 0 0.25rem;
+}
+header .subtitle {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ── Navigation ── */
+nav {
+  text-align: center;
+  padding: 0.75rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+nav a {
+  display: inline-block;
+  margin: 0.25rem 0.6rem;
+  text-decoration: none;
+  color: var(--crimson);
+  font-size: 0.95rem;
+}
+nav a:hover { text-decoration: underline; }
+nav a.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* ── Content area ── */
+.content {
+  padding-top: 0.5rem;
+  padding-bottom: 2rem;
+}
+
+/* ── Headings ── */
+h2 {
+  color: var(--crimson-dark);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.35rem;
+  margin-top: 2rem;
+}
+h3 {
+  color: var(--crimson);
+  margin-top: 1.5rem;
+}
+h4 {
+  color: var(--text);
+  margin-top: 1.25rem;
+  font-size: 1rem;
+}
+
+/* ── Links ── */
+a { color: var(--crimson); }
+a:hover { color: var(--crimson-dark); }
+
+/* ── Session cards (home page) ── */
+.session-cards {
+  display: grid;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+.session-card {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--crimson);
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
+  transition: border-color 0.2s;
+}
+.session-card:hover {
+  border-left-color: var(--crimson-dark);
+}
+.session-card h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+}
+.session-card p {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+/* ── Code blocks ── */
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+}
+p code, li code {
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+}
+
+/* ── Callout / disclaimer boxes ── */
+.callout {
+  border: 2px solid var(--crimson);
+  background: #FFF3F4;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+.callout.green {
+  background: #d4edda;
+  border-color: #28a745;
+}
+.callout.blue {
+  background: #d1ecf1;
+  border-color: #17a2b8;
+}
+.callout.yellow {
+  background: #fff3cd;
+  border-color: #ff9800;
+}
+.callout strong { display: block; margin-bottom: 0.25rem; }
+
+/* ── Resource lists ── */
+ul.resources {
+  list-style: none;
+  padding: 0;
+}
+ul.resources li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+ul.resources li:last-child { border-bottom: none; }
+ul.resources .desc {
+  display: block;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+/* ── Images ── */
+.figure {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+.figure img {
+  max-width: 700px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+.figure .caption {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  font-style: italic;
+  margin-top: 0.35rem;
+}
+
+/* ── Tables ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+th {
+  background: var(--crimson-dark);
+  color: #fff;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+}
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+tr:nth-child(even) { background: var(--bg-warm); }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-block;
+  background: var(--crimson);
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  font-family: -apple-system, Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+.btn:hover { background: var(--crimson-dark); color: #fff; }
+
+/* ── Footer ── */
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--text-light);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  header h1 { font-size: 1.4rem; }
+  nav a { display: block; margin: 0.3rem 0; }
+  .content { padding-left: 1rem; padding-right: 1rem; }
+}
