@@ -51,25 +51,36 @@ nvidia_segformer_pipeline = pipeline(
     model="nvidia/segformer-b0-finetuned-ade-512-512"
 )
 
-result = nvidia_segformer_pipeline(image_test)
+result = nvidia_segformer_pipeline(image_train)
 
 # Each element is a dict with 'label' and 'mask' (PIL Image)
 print("Number of classes:", len(result))
 # Number of classes: 15</code></pre>
 
 <pre><code>import matplotlib.pyplot as plt
+import numpy as np
 
-# Visualize selected class masks
-fig, ax = plt.subplots(1, 3, figsize=(12, 4))
+# Combine all masks into a single labeled image
+combined = np.zeros_like(np.array(result[0]["mask"]), dtype=np.float32)
+for i, r in enumerate(result):
+    combined[np.array(r["mask"]) > 0] = i + 1
 
-for i, idx in enumerate([3, 6, 9]):
-    ax[i].imshow(image_test)
-    ax[i].imshow(result[idx]["mask"], alpha=0.5)
-    ax[i].set_title(result[idx]["label"])
-    ax[i].axis("off")
+# Side by side: original image and segmentation masks
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+ax[0].imshow(image_train)
+ax[0].set_title("Original (image_train)")
+ax[0].axis("off")
+
+ax[1].imshow(combined, cmap="tab20", vmin=0, vmax=len(result))
+ax[1].set_title("Segmentation masks")
+ax[1].axis("off")
 
 plt.tight_layout()
-plt.show()</code></pre>
+plt.show()
+
+# Print all identified classes
+print("Number of classes:", len(result))
+print("Classes:", [r["label"] for r in result])</code></pre>
 
   <p>The NVIDIA model was trained on ADE20K (150 classes of general scenes), so it recognizes many object types &mdash; but it was not specifically trained to detect tree cover.</p>
 
@@ -86,23 +97,39 @@ plt.show()</code></pre>
 nvidia_result = nvidia_segformer_pipeline(image_test)
 tcd_result    = restor_tcd_pipeline(image_test)</code></pre>
 
-<pre><code># Side-by-side comparison on image_test
+<pre><code>import numpy as np
+
+# ADE20K vegetation-related classes (see SegFormer docs)
+vegetation_labels = {"tree", "grass", "plant", "flower", "palm"}
+
+# Combine all vegetation masks from the NVIDIA model
+nvidia_veg = np.zeros_like(np.array(nvidia_result[0]["mask"]))
+nvidia_veg_found = []
+for r in nvidia_result:
+    if r["label"] in vegetation_labels:
+        nvidia_veg = np.maximum(nvidia_veg, np.array(r["mask"]))
+        nvidia_veg_found.append(r["label"])
+
+# TCD model outputs a single "tree" class
+tcd_tree = next(r for r in tcd_result if r["label"] == "tree")
+
+print("NVIDIA vegetation classes found:", nvidia_veg_found)
+
+# Side-by-side comparison on image_test
 fig, ax = plt.subplots(1, 3, figsize=(15, 5))
 
 ax[0].imshow(image_test)
 ax[0].set_title("Original (image_test)")
 ax[0].axis("off")
 
-# NVIDIA SegFormer: overlay the "tree" class (index 3)
 ax[1].imshow(image_test)
-ax[1].imshow(nvidia_result[3]["mask"], alpha=0.5)
-ax[1].set_title("NVIDIA SegFormer — tree class")
+ax[1].imshow(nvidia_veg, alpha=0.5)
+ax[1].set_title("NVIDIA — vegetation classes")
 ax[1].axis("off")
 
-# TCD SegFormer: overlay the "tree" class (index 1)
 ax[2].imshow(image_test)
-ax[2].imshow(tcd_result[1]["mask"], alpha=0.5)
-ax[2].set_title("TCD SegFormer — tree class")
+ax[2].imshow(tcd_tree["mask"], alpha=0.5)
+ax[2].set_title("TCD — tree class")
 ax[2].axis("off")
 
 plt.tight_layout()
@@ -149,15 +176,6 @@ plt.show()</code></pre>
     <li>What did fine-tuning buy us? How does the TCD output differ from the NVIDIA output on the same image?</li>
     <li>Are there benefits of fine-tuning in terms of GPU time?</li>
     <li>How is fine-tuning relevant for science?</li>
-  </ul>
-
-  <p><strong>Try it yourself</strong> &mdash; Use the ID of an image stored in your Google Drive and run the <code>SlimSAM-uniform-77</code> segmenter:</p>
-
-<pre><code>sam_pipeline = pipeline("image-segmentation", model="Zigeng/SlimSAM-uniform-77")
-sam_pipeline("https://drive.google.com/uc?export=view&id=&lt;your_image_id&gt;")</code></pre>
-
-  <ul>
-    <li>How many masks and which labels do the results have?</li>
   </ul>
 
   <p style="text-align:center; margin-top:2rem;">

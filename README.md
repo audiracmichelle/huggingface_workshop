@@ -42,6 +42,7 @@ export CLAUDE_CODE_USE_BEDROCK=1
 ## Materials
 * [Website](https://audiracmichelle.github.io/huggingface_workshop/)
 * [Follow Along Notebook](./follow_along.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/audiracmichelle/huggingface_workshop/blob/main/follow_along.ipynb)
+* [Follow Along Prefilled](./follow_along_prefilled.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/audiracmichelle/huggingface_workshop/blob/main/follow_along_prefilled.ipynb)
 * [Notebook](./huggingface_workshop.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/audiracmichelle/huggingface_workshop/blob/main/huggingface_workshop.ipynb)
 
 ## Requirements
@@ -52,3 +53,17 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+
+
+Try it yourself — Use the ID of an image stored in your Google Drive and run the SlimSAM-uniform-77 segmenter:
+
+sam_pipeline = pipeline("image-segmentation", model="Zigeng/SlimSAM-uniform-77")
+sam_pipeline("https://drive.google.com/uc?export=view&id=<your_image_id>")
+How many masks and which labels do the results have?
+
+"""
+  Try it yourself: run SlimSAM-uniform-77 on your own image
+"""
+#sam_pipeline = pipeline("image-segmentation", model="Zigeng/SlimSAM-uniform-77")
+#sam_pipeline("https://drive.google.com/uc?export=view&id=<your_image_id>")

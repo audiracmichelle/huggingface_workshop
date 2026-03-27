@@ -89,3 +89,16 @@ Incorporate additional notes to:
     - Explain why models/processors with `from_pretrained()`; run inference inside `torch.no_grad()`
     - Explain why images are PIL objects; use `.resize((512, 512))` for visualization
 
+## Think of a way to test SAM on an image of the student
+
+Try it yourself — Use the ID of an image stored in your Google Drive and run the SlimSAM-uniform-77 segmenter:
+
+sam_pipeline = pipeline("image-segmentation", model="Zigeng/SlimSAM-uniform-77")
+sam_pipeline("https://drive.google.com/uc?export=view&id=<your_image_id>")
+How many masks and which labels do the results have?
+
+"""
+  Try it yourself: run SlimSAM-uniform-77 on your own image
+"""
+#sam_pipeline = pipeline("image-segmentation", model="Zigeng/SlimSAM-uniform-77")
+#sam_pipeline("https://drive.google.com/uc?export=view&id=<your_image_id>")
