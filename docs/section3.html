@@ -169,16 +169,6 @@ plt.show()</code></pre>
   <p>Both models share the same SegFormer backbone (<code>mit-b0</code>), but differ in their <strong>decode head</strong> &mdash; specifically the final classifier layer, which was re-trained for the target task. This is the power of <strong>fine-tuning</strong>: adapting a general-purpose model to a specific domain.</p>
 
   <!-- ════════════════════════════════════════════ -->
-  <h2>3.4 Discussion</h2>
-
-  <p>Reflecting on the comparison results:</p>
-  <ul>
-    <li>What did fine-tuning buy us? How does the TCD output differ from the NVIDIA output on the same image?</li>
-    <li>Are there benefits of fine-tuning in terms of GPU time?</li>
-    <li>How is fine-tuning relevant for science?</li>
-  </ul>
-
-  <!-- ════════════════════════════════════════════ -->
   <h2>Bonus: Fine-Tuned Models vs. Foundation Models</h2>
 
   <p>The models we used in this section are <strong>fine-tuned</strong> &mdash; they were trained on a specific dataset to recognize specific classes. Fine-tuning adapts a general-purpose model to a narrow domain (e.g., tree cover detection) by re-training its final layers on labeled data.</p>
