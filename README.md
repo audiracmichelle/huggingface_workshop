@@ -40,12 +40,12 @@ export CLAUDE_CODE_USE_BEDROCK=1
 ```
 
 ## Materials
-* [Website]() <!-- TODO: create a github pages website -->
-* [Notebook](./huggingface_workshop.ipynb)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/audiracmichelle/huggingface_workshop/blob/main/huggingface_workshop.ipynb)
+* [Website](https://audiracmichelle.github.io/huggingface_workshop/)
+* [Follow Along Notebook](./follow_along.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/audiracmichelle/huggingface_workshop/blob/main/follow_along.ipynb)
+* [Notebook](./huggingface_workshop.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/audiracmichelle/huggingface_workshop/blob/main/huggingface_workshop.ipynb)
 
 ## Requirements
-If you want to run locally:
+If you want to run the notebooks locally:
 
 ```bash
 python -m venv .venv
