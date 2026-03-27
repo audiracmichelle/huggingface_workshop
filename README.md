@@ -29,11 +29,11 @@ This repo contains the materials for a hands-on workshop on **Hugging Face** dat
 
 <!-- 5. Ship & share reproducible results: save/version artifacts and publish your model (and supporting assets) so others can reuse your work. -->
 
-## Setup
+## Harvard Setup
 
 ```
 export ANTHROPIC_BEDROCK_BASE_URL=https://apis.huit.harvard.edu/ais-bedrock-llm/v2
-export ANTHROPIC_API_KEY=FaVxoM0WlGxnifFgETTzVlFixjieOhHkblEkcNhATA9hfUGn
+export ANTHROPIC_API_KEY=$(cat api_key.txt)
 export ANTHROPIC_SMALL_FAST_MODEL=us.anthropic.claude-opus-4-5-20251101-v1:0
 export CLAUDE_CODE_SKIP_BEDROCK_AUTH=1
 export CLAUDE_CODE_USE_BEDROCK=1
@@ -53,17 +53,3 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-
-
-
-Try it yourself — Use the ID of an image stored in your Google Drive and run the SlimSAM-uniform-77 segmenter:
-
-sam_pipeline = pipeline("image-segmentation", model="Zigeng/SlimSAM-uniform-77")
-sam_pipeline("https://drive.google.com/uc?export=view&id=<your_image_id>")
-How many masks and which labels do the results have?
-
-"""
-  Try it yourself: run SlimSAM-uniform-77 on your own image
-"""
-#sam_pipeline = pipeline("image-segmentation", model="Zigeng/SlimSAM-uniform-77")
-#sam_pipeline("https://drive.google.com/uc?export=view&id=<your_image_id>")

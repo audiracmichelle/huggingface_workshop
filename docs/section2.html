@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2 &mdash; Use Hugging Face MCP with Claude Code</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Hugging Face Workshop</h1>
+  <p class="subtitle">Hands-on workshop on Hugging Face datasets, models, and tools</p>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="section1.html">1 &mdash; Navigate HF</a>
+  <a href="section2.html" class="active">2 &mdash; HF MCP</a>
+  <a href="section3.html">3 &mdash; Run Models</a>
+  <a href="section4.html">4 &mdash; Training Loop</a>
+</nav>
+
+<div class="content">
+
+  <h2>Section 2 &mdash; Use Hugging Face MCP with Claude Code</h2>
+  <p>In this section we set up access to Claude through a Harvard billing account, then explore how to use the Hugging Face MCP server to search datasets and models directly from Claude Code.</p>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>2.1 Access Claude through a Harvard Billing Account</h2>
+
+  <p><a href="https://claude.ai/code" target="_blank">Claude Code</a> is Anthropic's CLI for Claude. For this workshop, access is provided through Harvard's billing account via AWS Bedrock.</p>
+
+  <div class="callout blue">
+    <strong>Previous session</strong>
+    Claude Code setup was covered in detail in a previous workshop. See the full walkthrough at
+    <a href="https://astrostubbs.github.io/GenAI-for-Scholarship/session3-power-user.html" target="_blank">GenAI for Scholarship &mdash; Session 3: Power User</a>.
+  </div>
+
+  <h3>Install Claude Code</h3>
+
+  <p>If you don't have Claude Code installed:</p>
+
+<pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+
+  <h3>Configure environment variables</h3>
+
+  <p>Set these environment variables to route Claude Code through the Harvard billing endpoint:</p>
+
+<pre><code>export ANTHROPIC_BEDROCK_BASE_URL=https://apis.huit.harvard.edu/ais-bedrock-llm/v2
+export ANTHROPIC_API_KEY=$(cat api_key.txt)
+export ANTHROPIC_SMALL_FAST_MODEL=us.anthropic.claude-opus-4-5-20251101-v1:0
+export CLAUDE_CODE_SKIP_BEDROCK_AUTH=1
+export CLAUDE_CODE_USE_BEDROCK=1</code></pre>
+
+  <div class="callout yellow">
+    <strong>API key</strong>
+    The API key will be provided during the workshop. Store it in a file called <code>api_key.txt</code> and never commit it to version control.
+  </div>
+
+  <h3>Verify it works</h3>
+
+  <p>Launch Claude Code and confirm you can interact with it:</p>
+
+<pre><code>claude</code></pre>
+
+  <p>Try a simple prompt to verify the connection:</p>
+
+<pre><code>> What model are you?</code></pre>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>2.2 Explore MCP-Powered Workflows</h2>
+
+  <p><strong>MCP (Model Context Protocol)</strong> lets Claude Code connect to external tools and data sources. The <a href="https://huggingface.co/docs/hub/agents-mcp" target="_blank">Hugging Face MCP server</a> gives Claude direct access to search and explore datasets, models, and Spaces on the Hub.</p>
+
+  <h3>Get a Hugging Face account</h3>
+
+  <p>If you don't have one yet, sign up for a free account at <a href="https://huggingface.co/join" target="_blank">huggingface.co/join</a>. You just need an email address. This gives you access to the Hub, model cards, dataset viewers, and the MCP server.</p>
+
+  <h3>Get a Hugging Face token</h3>
+
+  <p>The HF MCP server requires authentication. Once logged in, go to <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co/settings/tokens</a> and create a new token (the default "read" permissions are sufficient).</p>
+
+  <h3>Configure the Hugging Face MCP server</h3>
+
+  <p>Add the hosted HF MCP server to Claude Code:</p>
+
+<pre><code>claude mcp add hf-mcp-server \
+  -t http https://huggingface.co/mcp \
+  -H "Authorization: Bearer &lt;YOUR_HF_TOKEN&gt;"</code></pre>
+
+  <div class="callout yellow">
+    <strong>Quick setup</strong>
+    You can also go to <a href="https://huggingface.co/settings/mcp" target="_blank">huggingface.co/settings/mcp</a> while logged in, select your client, and copy the generated configuration snippet.
+  </div>
+
+  <p>Verify it was added:</p>
+
+<pre><code>claude mcp list</code></pre>
+
+  <h3>See the available tools</h3>
+
+  <p>Inside Claude Code, type <code>/mcp</code> to open the MCP dialog. This shows all connected servers and the tools they provide. For the HF MCP server, you should see tools like:</p>
+
+  <ul>
+    <li><strong>hub_repo_search</strong> &mdash; search for models, datasets, and Spaces</li>
+    <li><strong>hub_repo_details</strong> &mdash; get details and README for a specific repo</li>
+    <li><strong>paper_search</strong> &mdash; find ML research papers</li>
+    <li><strong>hf_doc_search</strong> &mdash; search Hugging Face documentation</li>
+    <li><strong>space_search</strong> &mdash; semantic search for Spaces/apps</li>
+  </ul>
+
+  <div class="callout blue">
+    <strong>What is MCP?</strong>
+    MCP (Model Context Protocol) is an open standard that lets AI assistants connect to external tools and data sources.
+    When you add an MCP server, Claude gains new capabilities &mdash; in this case, the ability to search and read Hugging Face Hub resources directly.
+  </div>
+
+  <h3>Try it: search for datasets</h3>
+
+  <p>Launch Claude Code and ask it to search the Hub:</p>
+
+<pre><code>> Search Hugging Face for image segmentation datasets related to tree cover</code></pre>
+
+  <p>Claude will use the MCP server to query the Hub and return matching datasets, including cards, metadata, and download counts.</p>
+
+  <h3>Try it: search for models</h3>
+
+<pre><code>> Find SegFormer models on Hugging Face that are fine-tuned for semantic segmentation</code></pre>
+
+  <h3>Try it: read a model card</h3>
+
+<pre><code>> Read the model card for restor/tcd-segformer-mit-b0 and summarize the training details</code></pre>
+
+  <h3>Try it: compare models</h3>
+
+<pre><code>> Compare the model cards of nvidia/segformer-b0-finetuned-ade-512-512 and restor/tcd-segformer-mit-b0. What are the key differences in training data, number of classes, and intended use?</code></pre>
+
+  <div class="callout green">
+    <strong>Why MCP matters</strong>
+    Without MCP, you'd need to manually browse the Hub, copy URLs, and paste information into your conversation.
+    With the HF MCP server, Claude can search, read, and reason about Hub resources in a single workflow &mdash; making exploration faster and more interactive.
+  </div>
+
+  <p style="text-align:center; margin-top:2rem;">
+    <a href="section3.html" class="btn">Next: Run Models in Minutes &rarr;</a>
+  </p>
+
+</div>
+
+<footer>
+  &copy; 2025 Hugging Face Workshop
+</footer>
+
+</body>
+</html>
