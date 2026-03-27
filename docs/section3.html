@@ -18,7 +18,7 @@
   <a href="section1.html">1 &mdash; Navigate HF</a>
   <a href="section2.html">2 &mdash; HF MCP</a>
   <a href="section3.html" class="active">3 &mdash; Run Models</a>
-  <a href="section4.html">4 &mdash; Training Loop</a>
+
 </nav>
 
 <div class="content">
@@ -178,9 +178,58 @@ plt.show()</code></pre>
     <li>How is fine-tuning relevant for science?</li>
   </ul>
 
-  <p style="text-align:center; margin-top:2rem;">
-    <a href="section4.html" class="btn">Next: Build a Training Loop &rarr;</a>
+  <!-- ════════════════════════════════════════════ -->
+  <h2>Bonus: Fine-Tuned Models vs. Foundation Models</h2>
+
+  <p>The models we used in this section are <strong>fine-tuned</strong> &mdash; they were trained on a specific dataset to recognize specific classes. Fine-tuning adapts a general-purpose model to a narrow domain (e.g., tree cover detection) by re-training its final layers on labeled data.</p>
+
+  <p>A different approach is <strong>foundation models</strong> like <a href="https://ai.meta.com/research/publications/sam-3-segment-anything-with-concepts/" target="_blank">SAM (Segment Anything Model)</a>. Foundation models are pre-trained on massive, diverse datasets and can generalize to new tasks <em>without</em> fine-tuning. <a href="https://ai.meta.com/research/publications/sam-3-segment-anything-with-concepts/" target="_blank">SAM 3</a>, the latest version, accepts <strong>text prompts</strong> &mdash; you can ask it to segment "tree" in any image, even if it was never trained on aerial tree cover data.</p>
+
+  <p>SAM 3 was trained on massive labeled data (11M+ images, 1B+ masks with concept labels) &mdash; it learned many concepts during pre-training. It's not truly "zero-shot" in the strict ML sense. A more accurate description is that it works <strong>without task-specific fine-tuning</strong> &mdash; you don't need to collect and label your own dataset.</p>
+
+  <table>
+    <tr><th></th><th>Fine-tuned (SegFormer)</th><th>Foundation model (SAM)</th></tr>
+    <tr>
+      <td><strong>Training</strong></td>
+      <td>Re-trained on a labeled dataset for a specific task</td>
+      <td>Pre-trained on massive data, works without task-specific fine-tuning</td>
+    </tr>
+    <tr>
+      <td><strong>Output</strong></td>
+      <td>Per-pixel class labels (e.g., "tree", "background")</td>
+      <td>Masks for prompted objects, no predefined classes</td>
+    </tr>
+    <tr>
+      <td><strong>Labeling effort</strong></td>
+      <td>Requires labeled training data</td>
+      <td>No labeling needed</td>
+    </tr>
+    <tr>
+      <td><strong>Best for</strong></td>
+      <td>Domain-specific accuracy</td>
+      <td>Rapid exploration, annotation, unknown objects</td>
+    </tr>
+  </table>
+
+  <h3>Try it yourself: SAM on aerial imagery</h3>
+
+  <p>Download the sample images to upload to the demo:</p>
+  <p>
+    <a href="https://raw.githubusercontent.com/audiracmichelle/huggingface_workshop/main/images/image_train.png" download class="btn">Download image_train</a>
+    <a href="https://raw.githubusercontent.com/audiracmichelle/huggingface_workshop/main/images/image_test.png" download class="btn">Download image_test</a>
   </p>
+
+  <p>Try <a href="https://huggingface.co/spaces/prithivMLmods/SAM3-Demo" target="_blank">SAM 3 Demo</a> &mdash; a Hugging Face Space running Meta's latest Segment Anything Model. Upload one of the aerial images from the workshop and give it a text prompt like <code>"tree"</code>.</p>
+
+  <p style="text-align:center;">
+    <a href="https://huggingface.co/spaces/prithivMLmods/SAM3-Demo" target="_blank" class="btn">Open SAM 3 Demo</a>
+  </p>
+
+  <ul>
+    <li>Does SAM 3 segment trees when prompted with "tree"?</li>
+    <li>How does the output compare to the SegFormer results from earlier?</li>
+    <li>What does this tell you about the difference between <strong>fine-tuned models</strong> and <strong>foundation models</strong>?</li>
+  </ul>
 
 </div>
 
