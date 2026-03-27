@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4 &mdash; Fine-Tuning and Foundation Models</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Hugging Face Workshop</h1>
+  <p class="subtitle">Hands-on workshop on Hugging Face datasets, models, and tools</p>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="section1.html">1 &mdash; Navigate HF</a>
+  <a href="section2.html">2 &mdash; HF MCP</a>
+  <a href="section3.html">3 &mdash; Run Models</a>
+  <a href="section4.html" class="active">4 &mdash; Fine-Tuning &amp; Foundation Models</a>
+</nav>
+
+<div class="content">
+
+  <h2>Section 4 &mdash; Fine-Tuning and Foundation Models</h2>
+  <p>In this section we compare two approaches to adapting models for new tasks: <strong>fine-tuning</strong> an existing model on domain-specific data, and using <strong>foundation models</strong> that generalize without any additional training.</p>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>4.1 What is Fine-Tuning?</h2>
+
+  <p>Fine-tuning means taking a pre-trained model and re-training some of its layers on a new, domain-specific dataset. The model keeps the general knowledge it learned during pre-training and adapts its output to the new task.</p>
+
+  <h3>How the TCD SegFormer was built</h3>
+
+  <p>In Section 3 we compared two models on tree cover detection:</p>
+
+  <table>
+    <tr><th></th><th>NVIDIA SegFormer</th><th>TCD SegFormer</th></tr>
+    <tr>
+      <td><strong>Starting point</strong></td>
+      <td>Pre-trained on ImageNet, fine-tuned on ADE20K</td>
+      <td>Started from the NVIDIA SegFormer weights</td>
+    </tr>
+    <tr>
+      <td><strong>Fine-tuning data</strong></td>
+      <td>ADE20K (150 scene classes, 20K images)</td>
+      <td>Restor TCD (~4,600 aerial images, 2 classes)</td>
+    </tr>
+    <tr>
+      <td><strong>What changed</strong></td>
+      <td>&mdash;</td>
+      <td>Classifier head replaced (150 &rarr; 2 classes), all layers re-trained on tree cover data</td>
+    </tr>
+    <tr>
+      <td><strong>Result</strong></td>
+      <td>General scene segmentation</td>
+      <td>Specialized tree cover detection</td>
+    </tr>
+  </table>
+
+  <p>The key insight: the NVIDIA and TCD models share the <strong>same backbone</strong> (<code>mit-b0</code>, 3.7M parameters). Fine-tuning only changed what the model <em>looks for</em>, not how it <em>sees</em>.</p>
+
+  <h3>The fine-tuning recipe</h3>
+
+  <p>A typical fine-tuning workflow on Hugging Face involves:</p>
+
+  <ol>
+    <li><strong>Load a pre-trained model</strong> with <code>from_pretrained()</code>, replacing the classifier head for the new number of classes (<code>ignore_mismatched_sizes=True</code>)</li>
+    <li><strong>Preprocess the dataset</strong> using the model's processor to convert images and masks to tensors</li>
+    <li><strong>Configure training</strong> with <code>TrainingArguments</code> (learning rate, epochs, batch size, evaluation strategy)</li>
+    <li><strong>Train</strong> with the HuggingFace <code>Trainer</code>, which handles the training loop, gradient computation, checkpointing, and evaluation</li>
+    <li><strong>Evaluate</strong> using metrics like <strong>Mean IoU</strong> (Intersection over Union) &mdash; the standard metric for segmentation</li>
+  </ol>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>4.2 Foundation Models: SAM (Segment Anything)</h2>
+
+  <p><a href="https://segment-anything.com/" target="_blank">SAM (Segment Anything Model)</a> is a foundation model for image segmentation developed by Meta. Unlike SegFormer, which is trained for specific class labels, SAM can segment <strong>any object</strong> in an image without knowing what it is.</p>
+
+  <table>
+    <tr><th></th><th>Fine-tuned model (SegFormer)</th><th>Foundation model (SAM)</th></tr>
+    <tr>
+      <td><strong>Approach</strong></td>
+      <td>Semantic segmentation &mdash; assigns a class label to each pixel</td>
+      <td>Promptable segmentation &mdash; segments objects given a prompt (point, box, or text)</td>
+    </tr>
+    <tr>
+      <td><strong>Training</strong></td>
+      <td>Fine-tuned on a specific dataset with class labels</td>
+      <td>Pre-trained on 11M images with 1B+ masks</td>
+    </tr>
+    <tr>
+      <td><strong>Output</strong></td>
+      <td>Per-pixel class labels (e.g., "tree", "background")</td>
+      <td>Binary masks (object vs. background) without class names</td>
+    </tr>
+    <tr>
+      <td><strong>Labeling effort</strong></td>
+      <td>Requires a labeled dataset for your domain</td>
+      <td>No labeling needed &mdash; works zero-shot</td>
+    </tr>
+    <tr>
+      <td><strong>Best for</strong></td>
+      <td>Known categories, domain-specific accuracy</td>
+      <td>Zero-shot segmentation, interactive annotation, unknown objects</td>
+    </tr>
+  </table>
+
+  <div class="callout green">
+    <strong>Why SAM matters for science</strong>
+    SAM represents a shift toward <strong>foundation models</strong> for segmentation &mdash; models that generalize across domains without fine-tuning.
+    This means you can segment objects in new domains (e.g., cells, satellite imagery, field samples) without collecting and labeling a training dataset first.
+    You can even use SAM to <em>create</em> training labels, then fine-tune a smaller model like SegFormer on those labels.
+  </div>
+
+  <h3>Try it yourself: Grounded SAM</h3>
+
+  <p><strong>Grounded SAM</strong> combines two models to do text-prompted segmentation:</p>
+  <ol>
+    <li><strong>Grounding DINO</strong> &mdash; takes a text prompt (e.g., "tree") and finds bounding boxes around matching objects</li>
+    <li><strong>SAM</strong> &mdash; takes those boxes and produces precise segmentation masks</li>
+  </ol>
+
+  <p>Load the data and both models:</p>
+
+<pre><code>from datasets import load_dataset
+from transformers import pipeline, SamModel, SamProcessor
+import torch
+
+dataset = load_dataset("restor/tcd-nc")
+image_train = dataset["train"][0]["image"]
+image_test  = dataset["test"][15]["image"]
+
+# Step 1: Grounding DINO detects objects from text
+detector = pipeline(
+    "zero-shot-object-detection",
+    model="IDEA-Research/grounding-dino-tiny"
+)
+
+# Step 2: SAM segments the detected regions
+sam_model = SamModel.from_pretrained("facebook/sam-vit-base")
+sam_processor = SamProcessor.from_pretrained("facebook/sam-vit-base")</code></pre>
+
+  <p>Detect "tree" regions and segment them:</p>
+
+<pre><code>def grounded_sam(image, text_prompt, threshold=0.3):
+    # Detect bounding boxes from text
+    detections = detector(image, candidate_labels=[text_prompt], threshold=threshold)
+    if not detections:
+        print("No detections found.")
+        return [], []
+
+    # Convert boxes to SAM format [[x1, y1, x2, y2], ...]
+    boxes = [[d["box"]["xmin"], d["box"]["ymin"],
+              d["box"]["xmax"], d["box"]["ymax"]] for d in detections]
+
+    # Run SAM on detected boxes
+    inputs = sam_processor(image, input_boxes=[boxes], return_tensors="pt")
+    with torch.no_grad():
+        outputs = sam_model(**inputs)
+    masks = sam_processor.image_processor.post_process_masks(
+        outputs.pred_masks,
+        inputs["original_sizes"],
+        inputs["reshaped_input_sizes"]
+    )[0].squeeze(1).numpy()
+
+    return detections, masks</code></pre>
+
+<pre><code># Run on image_train
+detections_train, masks_train = grounded_sam(image_train, "tree")
+print(f"image_train: {len(detections_train)} tree regions detected")</code></pre>
+
+<pre><code># Run on image_test
+detections_test, masks_test = grounded_sam(image_test, "tree")
+print(f"image_test: {len(detections_test)} tree regions detected")</code></pre>
+
+  <p>Visualize the results:</p>
+
+<pre><code>import matplotlib.pyplot as plt
+import numpy as np
+
+def show_grounded_sam(image, detections, masks, title):
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+    ax[0].imshow(image)
+    ax[0].set_title(f"Original ({title})")
+    ax[0].axis("off")
+
+    ax[1].imshow(image)
+    # Overlay all detected tree masks
+    combined = np.zeros(masks[0].shape, dtype=bool) if len(masks) > 0 else np.zeros((1,1))
+    for m in masks:
+        combined = combined | (m > 0.5)
+    ax[1].imshow(combined, alpha=0.5, cmap="Greens")
+    ax[1].set_title(f"Grounded SAM — 'tree' ({len(detections)} regions)")
+    ax[1].axis("off")
+
+    plt.tight_layout()
+    plt.show()
+
+show_grounded_sam(image_train, detections_train, masks_train, "image_train")
+show_grounded_sam(image_test, detections_test, masks_test, "image_test")</code></pre>
+
+  <ul>
+    <li>How many tree regions does Grounded SAM find in each image?</li>
+    <li>How does this compare to the TCD SegFormer output from Section 3?</li>
+    <li>Try changing the text prompt to something else (e.g., "building", "road", "vegetation"). What happens?</li>
+  </ul>
+
+  <!-- ════════════════════════════════════════════ -->
+  <h2>4.3 Discussion</h2>
+
+  <ul>
+    <li>What are the trade-offs between fine-tuning a model (like SegFormer) vs. using a foundation model (like SAM)?</li>
+    <li>When would you choose one approach over the other for a research project?</li>
+    <li>How could you combine both approaches? (e.g., use SAM for annotation, then fine-tune SegFormer on the labels)</li>
+  </ul>
+
+</div>
+
+<footer>
+  &copy; 2025 Hugging Face Workshop
+</footer>
+
+</body>
+</html>
